@@ -1,32 +1,32 @@
+using Microsoft.Extensions.DependencyInjection;
+using Yfitops.Forms;
 using Yfitops.Models.Entities;
+using Yfitops.Repositories;
 
 namespace Yfitops
 {
     internal static class Program
     {
-  
+       
+        public static IServiceProvider ServiceProvider { get; private set; }
         [STAThread]
         static void Main()
-        {
-            
+        {   
+            var services = new ServiceCollection();
 
-            using (var context = new MusicContext())
-            {
-                
-                context.Users.Add(new User {Username = "admin", Password = "testPassword", Role = "Admin" });
-                context.SaveChanges();
+            services.AddDbContext<MusicContext>();
 
-            
-                var users = context.Users.ToList();
-                foreach (var u in users)
-                {
-                    Console.WriteLine($"User: {u.Username}, Role: {u.Role}");
-                }
-            }
+            services.AddScoped<IUserRepository, UserRepository>();
 
+            services.AddTransient<LoginForm>();
+            services.AddTransient<MainForm>();
+            services.AddTransient<RegistrationForm>();
+
+            ServiceProvider = services.BuildServiceProvider();
 
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+
+            Application.Run(ServiceProvider.GetRequiredService<LoginForm>());
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Yfitops
 {
-    partial class Form1
+    partial class LoginForm
     {
         /// <summary>
         ///  Required designer variable.
@@ -34,51 +34,54 @@
             textBox2 = new TextBox();
             password = new Label();
             label1 = new Label();
-            label2 = new Label();
+            linkLabel1 = new LinkLabel();
+            buttonGuest = new Button();
             SuspendLayout();
             // 
             // login
             // 
-            login.Location = new Point(268, 375);
+            login.Location = new Point(257, 293);
+            login.Margin = new Padding(3, 2, 3, 2);
             login.Name = "login";
-            login.Size = new Size(227, 34);
+            login.Size = new Size(199, 45);
             login.TabIndex = 0;
             login.Text = "Login";
             login.UseVisualStyleBackColor = true;
-            login.MouseHover += button1_Hover;
+            login.Click += login_Click;
             // 
             // nickname
             // 
             nickname.AutoSize = true;
-            nickname.Location = new Point(176, 255);
+            nickname.Location = new Point(154, 191);
             nickname.Name = "nickname";
             nickname.RightToLeft = RightToLeft.Yes;
-            nickname.Size = new Size(75, 20);
+            nickname.Size = new Size(61, 15);
             nickname.TabIndex = 1;
             nickname.Text = "Nickname";
             nickname.TextAlign = ContentAlignment.TopCenter;
             // 
             // textBox1
             // 
-            textBox1.Location = new Point(268, 248);
+            textBox1.Location = new Point(234, 186);
+            textBox1.Margin = new Padding(3, 2, 3, 2);
             textBox1.Name = "textBox1";
-            textBox1.Size = new Size(299, 27);
+            textBox1.Size = new Size(262, 23);
             textBox1.TabIndex = 2;
-            textBox1.TextChanged += textBox1_TextChanged;
             // 
             // textBox2
             // 
-            textBox2.Location = new Point(268, 293);
+            textBox2.Location = new Point(234, 220);
+            textBox2.Margin = new Padding(3, 2, 3, 2);
             textBox2.Name = "textBox2";
-            textBox2.Size = new Size(299, 27);
+            textBox2.Size = new Size(262, 23);
             textBox2.TabIndex = 4;
             // 
             // password
             // 
             password.AutoSize = true;
-            password.Location = new Point(176, 300);
+            password.Location = new Point(154, 225);
             password.Name = "password";
-            password.Size = new Size(70, 20);
+            password.Size = new Size(57, 15);
             password.TabIndex = 3;
             password.Text = "Password";
             // 
@@ -86,37 +89,50 @@
             // 
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 36F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.Location = new Point(241, 19);
+            label1.Location = new Point(211, 14);
             label1.Name = "label1";
-            label1.Size = new Size(349, 81);
+            label1.Size = new Size(281, 65);
             label1.TabIndex = 5;
             label1.Text = "YfitopsApp";
-            label1.Click += label1_Click;
             // 
-            // label2
+            // linkLabel1
             // 
-            label2.AutoSize = true;
-            label2.Location = new Point(364, 112);
-            label2.Name = "label2";
-            label2.Size = new Size(50, 20);
-            label2.TabIndex = 6;
-            label2.Text = "Log in";
-            label2.Click += label2_Click;
+            linkLabel1.AutoSize = true;
+            linkLabel1.Location = new Point(285, 260);
+            linkLabel1.Name = "linkLabel1";
+            linkLabel1.Size = new Size(148, 15);
+            linkLabel1.TabIndex = 7;
+            linkLabel1.TabStop = true;
+            linkLabel1.Text = "No account? Register here!";
+            linkLabel1.LinkClicked += linkLabel1_LinkClicked;
             // 
-            // Form1
+            // buttonGuest
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            buttonGuest.Location = new Point(295, 343);
+            buttonGuest.Name = "buttonGuest";
+            buttonGuest.Size = new Size(135, 23);
+            buttonGuest.TabIndex = 8;
+            buttonGuest.Text = "Continue as guest";
+            buttonGuest.UseVisualStyleBackColor = true;
+            buttonGuest.Click += buttonGuest_Click;
+            // 
+            // LoginForm
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
-            Controls.Add(label2);
+            BackColor = SystemColors.ButtonHighlight;
+            ClientSize = new Size(694, 421);
+            Controls.Add(buttonGuest);
+            Controls.Add(linkLabel1);
             Controls.Add(label1);
             Controls.Add(textBox2);
             Controls.Add(password);
             Controls.Add(textBox1);
             Controls.Add(nickname);
             Controls.Add(login);
-            Name = "Form1";
-            Text = "Form1";
+            Margin = new Padding(3, 2, 3, 2);
+            Name = "LoginForm";
+            Text = "LoginForm";
             ResumeLayout(false);
             PerformLayout();
         }
@@ -129,6 +145,7 @@
         private TextBox textBox2;
         private Label password;
         private Label label1;
-        private Label label2;
+        private LinkLabel linkLabel1;
+        private Button buttonGuest;
     }
 }
