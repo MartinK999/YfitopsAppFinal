@@ -31,9 +31,9 @@ namespace Yfitops.Repositories
             return _context.Albums.ToList();
         }
 
-        public IEnumerable<Album> GetByArtistId(int artistId)
+        public IEnumerable<Album> GetByArtistId(int userId)
         {
-            return _context.Albums.Where(a => a.ArtistId == artistId).ToList();
+            return _context.Albums.Where(a => a.ArtistId == userId).ToList();
         }
 
         public Album GetById(int id)

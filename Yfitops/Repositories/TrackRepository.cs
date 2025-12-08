@@ -31,7 +31,8 @@ namespace Yfitops.Repositories
             return _context.Tracks.ToList();
         }
 
-        public IEnumerable<Track> GetByAlbumId(int albumId)
+
+        public IEnumerable<Track> GetByAlbumId(int? albumId)
         {
             return _context.Tracks.Where(t => t.AlbumId == albumId).ToList();
         }
@@ -39,6 +40,11 @@ namespace Yfitops.Repositories
         public Track GetById(int id)
         {
             return _context.Tracks.Find(id);
+        }
+
+        public IEnumerable<Track> GetByUserId(int userId)
+        {
+            return _context.Tracks.Where(t => t.CreatedByUserId == userId).ToList();
         }
 
         public void Update(Track track)

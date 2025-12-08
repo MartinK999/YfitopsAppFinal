@@ -10,7 +10,7 @@ namespace Yfitops.Repositories
     public interface IAlbumRepository
     {
         Album GetById(int id);
-        IEnumerable<Album> GetByArtistId(int artistId);
+        IEnumerable<Album> GetByArtistId(int userId);
         IEnumerable<Album> GetAll();
         void Add(Album album);
         void Update(Album album);

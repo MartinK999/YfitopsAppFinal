@@ -4,17 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Yfitops.Models.Entities
+namespace Yfitops.Models
 {
-    public class Track
+    public class AlbumViewModel
     {
         public int Id { get; set; }
-        public int? AlbumId { get; set; }
         public string Title { get; set; }
-
-        public Album Album { get; set; }
-
-        public int CreatedByUserId { get; set; }
+        public int ArtistId { get; set; }
+        public string ArtistName { get; set; }   
     }
-
 }

@@ -28,9 +28,24 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             labelWelcome = new Label();
             labelUsername = new Label();
             buttonLogout = new Button();
+            dataTracks = new DataGridView();
+            titleDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
+            albumDataGridViewTextBoxColumn = new DataGridViewTextBoxColumn();
+            trackBindingSource = new BindingSource(components);
+            dataAlbums = new DataGridView();
+            titleDataGridViewTextBoxColumn1 = new DataGridViewTextBoxColumn();
+            albumBindingSource = new BindingSource(components);
+            buttonAddTrack = new Button();
+            buttonAddAlbum = new Button();
+            buttonAllTracks = new Button();
+            ((System.ComponentModel.ISupportInitialize)dataTracks).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)trackBindingSource).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dataAlbums).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)albumBindingSource).BeginInit();
             SuspendLayout();
             // 
             // labelWelcome
@@ -56,7 +71,7 @@
             // 
             buttonLogout.BackColor = Color.LightCoral;
             buttonLogout.FlatStyle = FlatStyle.Popup;
-            buttonLogout.Location = new Point(713, 12);
+            buttonLogout.Location = new Point(1043, 11);
             buttonLogout.Name = "buttonLogout";
             buttonLogout.Size = new Size(75, 23);
             buttonLogout.TabIndex = 2;
@@ -64,18 +79,106 @@
             buttonLogout.UseVisualStyleBackColor = false;
             buttonLogout.Click += buttonLogout_Click;
             // 
+            // dataTracks
+            // 
+            dataTracks.AutoGenerateColumns = false;
+            dataTracks.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataTracks.Columns.AddRange(new DataGridViewColumn[] { titleDataGridViewTextBoxColumn, albumDataGridViewTextBoxColumn });
+            dataTracks.DataSource = trackBindingSource;
+            dataTracks.Location = new Point(501, 79);
+            dataTracks.Name = "dataTracks";
+            dataTracks.Size = new Size(617, 328);
+            dataTracks.TabIndex = 3;
+            // 
+            // titleDataGridViewTextBoxColumn
+            // 
+            titleDataGridViewTextBoxColumn.DataPropertyName = "Title";
+            titleDataGridViewTextBoxColumn.HeaderText = "Title";
+            titleDataGridViewTextBoxColumn.Name = "titleDataGridViewTextBoxColumn";
+            // 
+            // albumDataGridViewTextBoxColumn
+            // 
+            albumDataGridViewTextBoxColumn.DataPropertyName = "Album";
+            albumDataGridViewTextBoxColumn.HeaderText = "Album";
+            albumDataGridViewTextBoxColumn.Name = "albumDataGridViewTextBoxColumn";
+            // 
+            // trackBindingSource
+            // 
+            trackBindingSource.DataSource = typeof(Models.Entities.Track);
+            // 
+            // dataAlbums
+            // 
+            dataAlbums.AutoGenerateColumns = false;
+            dataAlbums.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataAlbums.Columns.AddRange(new DataGridViewColumn[] { titleDataGridViewTextBoxColumn1 });
+            dataAlbums.DataSource = albumBindingSource;
+            dataAlbums.Location = new Point(12, 79);
+            dataAlbums.Name = "dataAlbums";
+            dataAlbums.Size = new Size(483, 328);
+            dataAlbums.TabIndex = 4;
+            dataAlbums.CellContentClick += dataAlbums_CellContentClick;
+            // 
+            // titleDataGridViewTextBoxColumn1
+            // 
+            titleDataGridViewTextBoxColumn1.DataPropertyName = "Title";
+            titleDataGridViewTextBoxColumn1.HeaderText = "Title";
+            titleDataGridViewTextBoxColumn1.Name = "titleDataGridViewTextBoxColumn1";
+            // 
+            // albumBindingSource
+            // 
+            albumBindingSource.DataSource = typeof(Models.Entities.Album);
+            // 
+            // buttonAddTrack
+            // 
+            buttonAddTrack.Location = new Point(851, 12);
+            buttonAddTrack.Name = "buttonAddTrack";
+            buttonAddTrack.Size = new Size(162, 23);
+            buttonAddTrack.TabIndex = 5;
+            buttonAddTrack.Text = "Add track";
+            buttonAddTrack.UseVisualStyleBackColor = true;
+            buttonAddTrack.Click += buttonAddTrack_Click;
+            // 
+            // buttonAddAlbum
+            // 
+            buttonAddAlbum.Location = new Point(660, 12);
+            buttonAddAlbum.Name = "buttonAddAlbum";
+            buttonAddAlbum.Size = new Size(175, 23);
+            buttonAddAlbum.TabIndex = 6;
+            buttonAddAlbum.Text = "Add Album";
+            buttonAddAlbum.UseVisualStyleBackColor = true;
+            buttonAddAlbum.Click += buttonAddAlbum_Click_1;
+            // 
+            // buttonAllTracks
+            // 
+            buttonAllTracks.Location = new Point(1022, 413);
+            buttonAllTracks.Name = "buttonAllTracks";
+            buttonAllTracks.Size = new Size(96, 23);
+            buttonAllTracks.TabIndex = 7;
+            buttonAllTracks.Text = "All tracks";
+            buttonAllTracks.UseVisualStyleBackColor = true;
+            buttonAllTracks.Click += buttonAllTracks_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ButtonHighlight;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(1130, 509);
+            Controls.Add(buttonAllTracks);
+            Controls.Add(buttonAddAlbum);
+            Controls.Add(buttonAddTrack);
+            Controls.Add(dataAlbums);
+            Controls.Add(dataTracks);
             Controls.Add(buttonLogout);
             Controls.Add(labelUsername);
             Controls.Add(labelWelcome);
             Name = "MainForm";
             Text = "MainForm";
             Load += MainForm_Load;
+            ((System.ComponentModel.ISupportInitialize)dataTracks).EndInit();
+            ((System.ComponentModel.ISupportInitialize)trackBindingSource).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dataAlbums).EndInit();
+            ((System.ComponentModel.ISupportInitialize)albumBindingSource).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -85,5 +188,16 @@
         private Label labelWelcome;
         private Label labelUsername;
         private Button buttonLogout;
+        private DataGridView dataTracks;
+        private BindingSource trackBindingSource;
+        private DataGridViewTextBoxColumn titleDataGridViewTextBoxColumn;
+        private DataGridViewTextBoxColumn albumDataGridViewTextBoxColumn;
+        private DataGridView dataAlbums;
+        private DataGridViewTextBoxColumn titleDataGridViewTextBoxColumn1;
+        private DataGridViewTextBoxColumn artistDataGridViewTextBoxColumn;
+        private BindingSource albumBindingSource;
+        private Button buttonAddTrack;
+        private Button buttonAddAlbum;
+        private Button buttonAllTracks;
     }
 }

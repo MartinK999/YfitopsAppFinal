@@ -16,7 +16,10 @@ namespace Yfitops
 
             services.AddDbContext<MusicContext>();
 
+            services.AddScoped<IAlbumRepository, AlbumRepository>();
+            services.AddScoped<ITrackRepository, TrackRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUserFavoriteRepository, UserFavoriteRepository>();
 
             services.AddTransient<LoginForm>();
             services.AddTransient<MainForm>();

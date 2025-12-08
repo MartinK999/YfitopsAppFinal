@@ -42,12 +42,17 @@ namespace Yfitops.Forms
                 Username = textBoxUsername.Text,
                 Password = hashedPassword,
                 Role = comboBoxRole.SelectedItem?.ToString() ?? "User",
-               
-            }; 
+
+            };
 
             _userRepository.Add(newUser);
             MessageBox.Show("Registration successful!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             this.Close();
+        }
+
+        private void RegistrationForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

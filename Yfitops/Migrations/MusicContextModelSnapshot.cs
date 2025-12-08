@@ -31,24 +31,7 @@ namespace Yfitops.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ArtistId");
-
                     b.ToTable("Albums");
-                });
-
-            modelBuilder.Entity("Yfitops.Models.Entities.Artist", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Artists");
                 });
 
             modelBuilder.Entity("Yfitops.Models.Entities.Track", b =>
@@ -57,7 +40,10 @@ namespace Yfitops.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AlbumId")
+                    b.Property<int?>("AlbumId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CreatedByUserId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Title")
@@ -117,24 +103,12 @@ namespace Yfitops.Migrations
                     b.ToTable("UserFavorites");
                 });
 
-            modelBuilder.Entity("Yfitops.Models.Entities.Album", b =>
-                {
-                    b.HasOne("Yfitops.Models.Entities.Artist", "Artist")
-                        .WithMany("Albums")
-                        .HasForeignKey("ArtistId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Artist");
-                });
-
             modelBuilder.Entity("Yfitops.Models.Entities.Track", b =>
                 {
                     b.HasOne("Yfitops.Models.Entities.Album", "Album")
                         .WithMany("Tracks")
                         .HasForeignKey("AlbumId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Album");
                 });
@@ -153,11 +127,6 @@ namespace Yfitops.Migrations
             modelBuilder.Entity("Yfitops.Models.Entities.Album", b =>
                 {
                     b.Navigation("Tracks");
-                });
-
-            modelBuilder.Entity("Yfitops.Models.Entities.Artist", b =>
-                {
-                    b.Navigation("Albums");
                 });
 
             modelBuilder.Entity("Yfitops.Models.Entities.User", b =>

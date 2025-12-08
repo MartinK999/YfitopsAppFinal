@@ -10,8 +10,9 @@ namespace Yfitops.Repositories
     public interface ITrackRepository
     {
         Track GetById(int id);
-        IEnumerable<Track> GetByAlbumId(int albumId);
+        IEnumerable<Track> GetByAlbumId(int? albumId);
         IEnumerable<Track> GetAll();
+        IEnumerable<Track> GetByUserId(int userId); 
         void Add(Track track);
         void Update(Track track);
         void Delete(Track track);

@@ -131,6 +131,7 @@
             Controls.Add(textBoxUsername);
             Name = "RegistrationForm";
             Text = "RegistrationForm";
+            Load += RegistrationForm_Load;
             ResumeLayout(false);
             PerformLayout();
         }
