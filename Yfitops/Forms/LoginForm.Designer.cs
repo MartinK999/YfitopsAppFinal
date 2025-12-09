@@ -67,6 +67,7 @@
             textBox1.Name = "textBox1";
             textBox1.Size = new Size(262, 23);
             textBox1.TabIndex = 2;
+            textBox1.Text = "Jozo";
             // 
             // textBox2
             // 
@@ -75,6 +76,7 @@
             textBox2.Name = "textBox2";
             textBox2.Size = new Size(262, 23);
             textBox2.TabIndex = 4;
+            textBox2.Text = "jozo";
             // 
             // password
             // 
@@ -120,7 +122,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = SystemColors.ButtonHighlight;
+            BackColor = Color.LightGreen;
             ClientSize = new Size(694, 421);
             Controls.Add(buttonGuest);
             Controls.Add(linkLabel1);
@@ -133,6 +135,7 @@
             Margin = new Padding(3, 2, 3, 2);
             Name = "LoginForm";
             Text = "LoginForm";
+            Load += LoginForm_Load;
             ResumeLayout(false);
             PerformLayout();
         }

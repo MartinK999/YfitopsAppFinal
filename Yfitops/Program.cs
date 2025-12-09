@@ -24,6 +24,7 @@ namespace Yfitops
             services.AddTransient<LoginForm>();
             services.AddTransient<MainForm>();
             services.AddTransient<RegistrationForm>();
+            services.AddTransient<FavoritesForm>();
 
             ServiceProvider = services.BuildServiceProvider();
 

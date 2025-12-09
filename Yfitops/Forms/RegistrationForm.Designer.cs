@@ -82,7 +82,8 @@
             // 
             // comboBoxRole
             // 
-            comboBoxRole.AllowDrop = true;
+            comboBoxRole.CausesValidation = false;
+            comboBoxRole.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBoxRole.FormattingEnabled = true;
             comboBoxRole.Items.AddRange(new object[] { "User", "Musician" });
             comboBoxRole.Location = new Point(328, 266);
@@ -119,7 +120,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = SystemColors.ButtonHighlight;
+            BackColor = Color.LightGreen;
             ClientSize = new Size(800, 450);
             Controls.Add(buttonReg);
             Controls.Add(labelRole);

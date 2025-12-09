@@ -42,6 +42,8 @@
             buttonAddTrack = new Button();
             buttonAddAlbum = new Button();
             buttonAllTracks = new Button();
+            labelRole = new Label();
+            buttonMyFav = new Button();
             ((System.ComponentModel.ISupportInitialize)dataTracks).BeginInit();
             ((System.ComponentModel.ISupportInitialize)trackBindingSource).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dataAlbums).BeginInit();
@@ -130,22 +132,24 @@
             // 
             // buttonAddTrack
             // 
+            buttonAddTrack.BackColor = Color.SpringGreen;
             buttonAddTrack.Location = new Point(851, 12);
             buttonAddTrack.Name = "buttonAddTrack";
             buttonAddTrack.Size = new Size(162, 23);
             buttonAddTrack.TabIndex = 5;
             buttonAddTrack.Text = "Add track";
-            buttonAddTrack.UseVisualStyleBackColor = true;
+            buttonAddTrack.UseVisualStyleBackColor = false;
             buttonAddTrack.Click += buttonAddTrack_Click;
             // 
             // buttonAddAlbum
             // 
+            buttonAddAlbum.BackColor = Color.LightGreen;
             buttonAddAlbum.Location = new Point(660, 12);
             buttonAddAlbum.Name = "buttonAddAlbum";
             buttonAddAlbum.Size = new Size(175, 23);
             buttonAddAlbum.TabIndex = 6;
             buttonAddAlbum.Text = "Add Album";
-            buttonAddAlbum.UseVisualStyleBackColor = true;
+            buttonAddAlbum.UseVisualStyleBackColor = false;
             buttonAddAlbum.Click += buttonAddAlbum_Click_1;
             // 
             // buttonAllTracks
@@ -158,12 +162,35 @@
             buttonAllTracks.UseVisualStyleBackColor = true;
             buttonAllTracks.Click += buttonAllTracks_Click;
             // 
+            // labelRole
+            // 
+            labelRole.AutoSize = true;
+            labelRole.ForeColor = Color.Fuchsia;
+            labelRole.Location = new Point(87, 35);
+            labelRole.Name = "labelRole";
+            labelRole.Size = new Size(38, 15);
+            labelRole.TabIndex = 8;
+            labelRole.Text = "label1";
+            // 
+            // buttonMyFav
+            // 
+            buttonMyFav.BackColor = Color.PaleGoldenrod;
+            buttonMyFav.Location = new Point(913, 413);
+            buttonMyFav.Name = "buttonMyFav";
+            buttonMyFav.Size = new Size(100, 23);
+            buttonMyFav.TabIndex = 9;
+            buttonMyFav.Text = "My Favorites";
+            buttonMyFav.UseVisualStyleBackColor = false;
+            buttonMyFav.Click += buttonMyFav_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = SystemColors.ButtonHighlight;
+            BackColor = SystemColors.InactiveCaption;
             ClientSize = new Size(1130, 509);
+            Controls.Add(buttonMyFav);
+            Controls.Add(labelRole);
             Controls.Add(buttonAllTracks);
             Controls.Add(buttonAddAlbum);
             Controls.Add(buttonAddTrack);
@@ -199,5 +226,7 @@
         private Button buttonAddTrack;
         private Button buttonAddAlbum;
         private Button buttonAllTracks;
+        private Label labelRole;
+        private Button buttonMyFav;
     }
 }

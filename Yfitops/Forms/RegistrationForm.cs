@@ -37,12 +37,16 @@ namespace Yfitops.Forms
             }
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(textBoxPassword.Text);
 
+            comboBoxRole.Items.Add("User");
+            comboBoxRole.Items.Add("Musician");
+
+            comboBoxRole.SelectedItem = "User";
+
             var newUser = new User
             {
                 Username = textBoxUsername.Text,
                 Password = hashedPassword,
-                Role = comboBoxRole.SelectedItem?.ToString() ?? "User",
-
+                Role = comboBoxRole.SelectedItem.ToString()
             };
 
             _userRepository.Add(newUser);

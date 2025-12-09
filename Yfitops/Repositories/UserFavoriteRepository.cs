@@ -26,6 +26,16 @@ namespace Yfitops.Repositories
             _context.SaveChanges();
         }
 
+        public bool Exists(int userId, string favoriteType, int favoriteId)
+        {
+            return _context.UserFavorites.Any(uf => uf.UserId == userId && uf.FavoriteType == favoriteType && uf.FavoriteId == favoriteId);
+        }
+
+        public IEnumerable<UserFavorite> GetAll()
+        {
+            return _context.UserFavorites.ToList();
+        }
+
         public UserFavorite GetById(int id)
         {
             return _context.UserFavorites.Find(id);
@@ -34,6 +44,13 @@ namespace Yfitops.Repositories
         public IEnumerable<UserFavorite> GetByUserId(int userId)
         {
             return _context.UserFavorites.Where(uf => uf.UserId == userId).ToList();
+        }
+
+        public IEnumerable<UserFavorite> GetFavoritesByType(int favoriteId, string favoriteType)
+        {
+            return _context.UserFavorites
+                .Where(uf => uf.FavoriteId == favoriteId && uf.FavoriteType == favoriteType)
+                .ToList();
         }
 
         public void Update(UserFavorite favorite)

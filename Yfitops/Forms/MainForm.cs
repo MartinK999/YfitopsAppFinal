@@ -26,30 +26,80 @@ namespace Yfitops
         private readonly IUserFavoriteRepository _userFavoriteRepository;
 
         public MainForm(IAlbumRepository albumRepository, IUserRepository userRepository,
-                ITrackRepository trackRepository)
+                ITrackRepository trackRepository, IUserFavoriteRepository userFavoriteRepository)
         {
             InitializeComponent();
 
             _albumRepository = albumRepository;
             _userRepository = userRepository;
             _trackRepository = trackRepository;
-
-
-
-
-
-            LoadAlbums();
-            LoadTracks();
-
-
+            _userFavoriteRepository = userFavoriteRepository;
+            dataTracks.DataBindingComplete += DataTracks_DataBindingComplete;
         }
 
         public void SetCurrentUser(User user)
         {
             _currentUser = user;
+
             SetupAlbumsGrid();
             SetupTracksGrid();
             UpdateUIBasedOnRole();
+            LoadAlbums();
+            LoadTracks();
+        }
+
+        private void DataTracks_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
+        {
+            if (dataAlbums.Columns.Contains("FavoriteAlbumButton"))
+            {
+                foreach (DataGridViewRow row in dataAlbums.Rows)
+                {
+                    if (row.DataBoundItem is AlbumViewModel album)
+                    {
+                        var albumBtnCell = (DataGridViewButtonCell)row.Cells["FavoriteAlbumButton"];
+                        if (_userFavoriteRepository.Exists(_currentUser.Id, "Album", album.Id))
+                        {
+                            albumBtnCell.Value = "Remove";
+                            albumBtnCell.Style.BackColor = Color.LightCoral;
+                        }
+                        else
+                        {
+                            albumBtnCell.Value = "Add";
+                            albumBtnCell.Style.BackColor = Color.LightGreen;
+                        }
+                    }
+                }
+
+                foreach (DataGridViewRow row in dataTracks.Rows)
+                {
+                    if (row.DataBoundItem is TrackViewModel track)
+                    {
+                        var trackBtnCell = (DataGridViewButtonCell)row.Cells["FavoriteTrackButton"];
+                        if (_userFavoriteRepository.Exists(_currentUser.Id, "Track", track.Id))
+                        {
+                            trackBtnCell.Value = "Remove";
+                            trackBtnCell.Style.BackColor = Color.LightCoral;
+                        }
+                        else
+                        {
+                            trackBtnCell.Value = "Add";
+                            trackBtnCell.Style.BackColor = Color.LightGreen;
+                        }
+
+                        var artistBtnCell = (DataGridViewButtonCell)row.Cells["FavoriteArtistButton"];
+                        if (_userFavoriteRepository.Exists(_currentUser.Id, "Artist", track.CreatedByUserId))
+                        {
+                            artistBtnCell.Value = "Remove";
+                            artistBtnCell.Style.BackColor = Color.LightCoral;
+                        }
+                        else
+                        {
+                            artistBtnCell.Value = "Add";
+                            artistBtnCell.Style.BackColor = Color.LightGreen;
+                        }
+                    }
+                }
+            }
 
         }
 
@@ -95,8 +145,23 @@ namespace Yfitops
             }
 
             labelUsername.Text = _currentUser.Username;
+            labelRole.Text = _currentUser.Role;
         }
 
+        private void LoadAlbums()
+        {
+
+            var albums = _albumRepository.GetAll().Select(a => new AlbumViewModel
+            {
+                Id = a.Id,
+                Title = a.Title,
+                ArtistId = a.ArtistId,
+                ArtistName = _userRepository.GetById(a.ArtistId).Username
+            }).ToList();
+
+            dataAlbums.DataSource = albums;
+
+        }
         private void LoadTracksForAlbum(int albumId)
         {
 
@@ -109,6 +174,7 @@ namespace Yfitops
             }).ToList();
 
             dataTracks.DataSource = tracks;
+
         }
 
         private void LoadTracks()
@@ -119,10 +185,12 @@ namespace Yfitops
                 Id = t.Id,
                 Title = t.Title,
                 AlbumTitle = t.AlbumId.HasValue ? _albumRepository.GetById(t.AlbumId.Value).Title : "-Standalone-",
-                TrackAuthor = _userRepository.GetById(t.CreatedByUserId)?.Username ?? "Unknown"
+                TrackAuthor = _userRepository.GetById(t.CreatedByUserId)?.Username ?? "Unknown",
+                CreatedByUserId = t.CreatedByUserId
             }).ToList();
 
             dataTracks.DataSource = tracks;
+
         }
 
         private void SetupAlbumsGrid()
@@ -160,6 +228,16 @@ namespace Yfitops
             if (_currentUser.Role == "Admin" || _currentUser.Role == "Musician")
             {
                 dataAlbums.Columns.Add(deleteAlbumBtn);
+            }
+
+            var favBtn = new DataGridViewButtonColumn();
+            favBtn.Name = "FavoriteAlbumButton";
+            favBtn.HeaderText = "♥ Favorite album";
+            favBtn.Text = "Add";
+            favBtn.UseColumnTextForButtonValue = false;
+            if (_currentUser.Role == "User" || _currentUser.Role == "Admin")
+            {
+                dataAlbums.Columns.Add(favBtn);
             }
 
             dataAlbums.CellClick += DataAlbums_CellClick;
@@ -208,6 +286,27 @@ namespace Yfitops
             {
                 dataTracks.Columns.Add(deleteBtn);
             }
+
+            var favBtn = new DataGridViewButtonColumn();
+            favBtn.Name = "FavoriteTrackButton";
+            favBtn.HeaderText = "♥ Favorite Track";
+            favBtn.Text = "Add";
+            favBtn.UseColumnTextForButtonValue = false;
+            if (_currentUser.Role == "User" || _currentUser.Role == "Admin")
+            {
+                dataTracks.Columns.Add(favBtn);
+            }
+
+            var favBtnArtist = new DataGridViewButtonColumn();
+            favBtnArtist.Name = "FavoriteArtistButton";
+            favBtnArtist.HeaderText = "♥ Favorite Artist";
+            favBtnArtist.Text = "Add";
+            favBtnArtist.UseColumnTextForButtonValue = false;
+            if (_currentUser.Role == "User" || _currentUser.Role == "Admin")
+            {
+                dataTracks.Columns.Add(favBtnArtist);
+            }
+
             dataTracks.CellClick += DataTracks_CellClick;
         }
 
@@ -220,7 +319,9 @@ namespace Yfitops
             if (dataTracks.Columns[e.ColumnIndex] is DataGridViewButtonColumn)
             {
                 string buttonText = dataTracks[e.ColumnIndex, e.RowIndex].Value.ToString();
+                var btnCell = (DataGridViewButtonCell)dataTracks.Rows[e.RowIndex].Cells[e.ColumnIndex];
                 var trackEntity = _trackRepository.GetById(track.Id);
+
                 if (buttonText == "Edit")
                 {
                     if (_currentUser.Role == "Admin" || (_currentUser.Role == "Musician" && trackEntity.CreatedByUserId == _currentUser.Id))
@@ -246,6 +347,16 @@ namespace Yfitops
                 {
                     if (_currentUser.Role == "Admin" || (_currentUser.Role == "Musician" && trackEntity.CreatedByUserId == _currentUser.Id))
                     {
+                        var trackFavs = _userFavoriteRepository.GetAll()
+                            .Where(f => f.FavoriteType == "Track" && f.FavoriteId == trackEntity.Id)
+                            .ToList();
+
+
+                        foreach (var f in trackFavs)
+                        {
+                            _userFavoriteRepository.Delete(f);
+                        }
+
                         _trackRepository.Delete(trackEntity);
                         if (trackEntity.AlbumId == null)
                         {
@@ -257,24 +368,75 @@ namespace Yfitops
                         }
                     }
                 }
+                else if (dataTracks.Columns[e.ColumnIndex].Name == "FavoriteTrackButton")
+                {
+                    if (_currentUser.Role == "User" || _currentUser.Role == "Admin")
+                    {
+
+                        if (_userFavoriteRepository.Exists(_currentUser.Id, "Track", track.Id))
+                        {
+                            var fav = _userFavoriteRepository.GetByUserId(_currentUser.Id)
+                                         .FirstOrDefault(f => f.FavoriteType == "Track" && f.FavoriteId == track.Id);
+                            if (fav != null)
+                            {
+                                _userFavoriteRepository.Delete(fav);
+                            }
+                        }
+                        else
+                        {
+                            // Add to favorites
+                            var newFav = new UserFavorite
+                            {
+                                UserId = _currentUser.Id,
+                                FavoriteType = "Track",
+                                FavoriteId = track.Id
+                            };
+                            _userFavoriteRepository.Add(newFav);
+                        }
+
+                        // Update button UI immediately
+                        var btnCellUI = (DataGridViewButtonCell)dataTracks.Rows[e.RowIndex].Cells[e.ColumnIndex];
+                        bool isNowFavorite = _userFavoriteRepository.Exists(_currentUser.Id, "Track", track.Id);
+                        btnCellUI.Value = isNowFavorite ? "Remove" : "Add";
+                        btnCellUI.Style.BackColor = isNowFavorite ? Color.LightCoral : Color.LightGreen;
+
+                    }
+                }
+                else if (dataTracks.Columns[e.ColumnIndex].Name == "FavoriteArtistButton")
+                {
+                    if (_currentUser.Role == "User" || _currentUser.Role == "Admin")
+                    {
+
+                        if (_userFavoriteRepository.Exists(_currentUser.Id, "Artist", track.CreatedByUserId))
+                        {
+                            var fav = _userFavoriteRepository.GetByUserId(_currentUser.Id)
+                                         .FirstOrDefault(f => f.FavoriteType == "Artist" && f.FavoriteId == track.CreatedByUserId);
+                            if (fav != null)
+                                _userFavoriteRepository.Delete(fav);
+                        }
+                        else
+                        {
+                            var newFav = new UserFavorite
+                            {
+                                UserId = _currentUser.Id,
+                                FavoriteType = "Artist",
+                                FavoriteId = track.CreatedByUserId
+                            };
+                            _userFavoriteRepository.Add(newFav);
+                        }
+
+                        var btnCellUI = (DataGridViewButtonCell)dataTracks.Rows[e.RowIndex].Cells[e.ColumnIndex];
+                        bool isNowFavorite = _userFavoriteRepository.Exists(_currentUser.Id, "Artist", track.CreatedByUserId);
+                        btnCellUI.Value = isNowFavorite ? "Remove" : "Add";
+                        btnCellUI.Style.BackColor = isNowFavorite ? Color.LightCoral : Color.LightGreen;
+                        LoadTracks();
+                    }
+                }
+
             }
         }
 
-        private void LoadAlbums()
-        {
-            var albums = _albumRepository.GetAll();
 
-            var list = albums.Select(a => new AlbumViewModel
-            {
-                Id = a.Id,
-                Title = a.Title,
-                ArtistId = a.ArtistId,
-                ArtistName = _userRepository.GetById(a.ArtistId).Username
-            }).ToList();
-
-            dataAlbums.DataSource = list;
-
-        }
         private void DataAlbums_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
@@ -303,8 +465,56 @@ namespace Yfitops
                 {
                     if (_currentUser.Role == "Admin" || (_currentUser.Role == "Musician" && album.ArtistId == _currentUser.Id))
                     {
+                        var albumFavs = _userFavoriteRepository.GetAll()
+                            .Where(f => f.FavoriteType == "Album" && f.FavoriteId == albumEntity.Id)
+                            .ToList();
+
+
+                        foreach (var f in albumFavs)
+                        {
+                            _userFavoriteRepository.Delete(f);
+                        }
+
+                        var trackIds = _trackRepository.GetByAlbumId(albumEntity.Id).Select(t => t.Id).ToList();
+                        var trackFavs = _userFavoriteRepository.GetAll()
+                            .Where(f => f.FavoriteType == "Track" && trackIds.Contains(f.FavoriteId))
+                            .ToList();
+                        foreach (var f in trackFavs)
+                        {
+                            _userFavoriteRepository.Delete(f);
+                        }
+
                         _albumRepository.Delete(albumEntity);
                         LoadAlbums();
+                    }
+                }
+                else if (dataAlbums.Columns[e.ColumnIndex].Name == "FavoriteAlbumButton")
+                {
+                    if (_currentUser.Role == "User" || _currentUser.Role == "Admin")
+                    {
+                        if (_userFavoriteRepository.Exists(_currentUser.Id, "Album", album.Id))
+                        {
+                            var fav = _userFavoriteRepository.GetByUserId(_currentUser.Id)
+                                         .FirstOrDefault(f => f.FavoriteType == "Album" && f.FavoriteId == album.Id);
+                            if (fav != null)
+                                _userFavoriteRepository.Delete(fav);
+                        }
+                        else
+                        {
+                            var newFav = new UserFavorite
+                            {
+                                UserId = _currentUser.Id,
+                                FavoriteType = "Album",
+                                FavoriteId = album.Id
+                            };
+                            _userFavoriteRepository.Add(newFav);
+                        }
+
+                        var btnCellUI = (DataGridViewButtonCell)dataAlbums.Rows[e.RowIndex].Cells[e.ColumnIndex];
+                        bool isNowFavorite = _userFavoriteRepository.Exists(_currentUser.Id, "Album", album.Id);
+                        btnCellUI.Value = isNowFavorite ? "Remove" : "Add";
+                        btnCellUI.Style.BackColor = isNowFavorite ? Color.LightCoral : Color.LightGreen;
+
                     }
                 }
             }
@@ -377,29 +587,33 @@ namespace Yfitops
             Album selectedAlbum = null;
             if (myAlbums.Any())
             {
-                string albumList = "0: None\n";
-                int idx = 1;
-                foreach (var album in myAlbums)
+                using (Form selectAlbumForm = new Form())
                 {
-                    albumList += $"{idx}: {album.Title}\n";
-                    idx++;
-                }
+                    selectAlbumForm.Text = "Select Album";
+                    selectAlbumForm.Width = 300;
+                    selectAlbumForm.Height = 150;
+                    selectAlbumForm.StartPosition = FormStartPosition.CenterParent;
 
-                string input = Prompt.ShowDialog(
-                     $"Choose album for the track:\n{albumList}",
-                     "Select Album"
-                );
+                    ComboBox comboBox = new ComboBox() { Left = 20, Top = 20, Width = 240 };
+                    comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+                    comboBox.Items.Add("None");
+                    foreach (var album in myAlbums)
+                    {
+                        comboBox.Items.Add(album.Title);
+                    }
 
-                if (int.TryParse(input, out int choice))
-                {
-                    if (choice >= 1 && choice <= myAlbums.Count)
-                        selectedAlbum = myAlbums[choice - 1];
-                    else
-                        selectedAlbum = null;
-                }
-                else
-                {
-                    selectedAlbum = null; // None
+                    comboBox.SelectedIndex = 0;
+
+                    Button btnOk = new Button() { Text = "OK", Left = 100, Width = 80, Top = 60, DialogResult = DialogResult.OK };
+                    selectAlbumForm.Controls.Add(comboBox);
+                    selectAlbumForm.Controls.Add(btnOk);
+                    selectAlbumForm.AcceptButton = btnOk;
+
+                    if (selectAlbumForm.ShowDialog() == DialogResult.OK)
+                    {
+                        if (comboBox.SelectedIndex > 0)
+                            selectedAlbum = myAlbums[comboBox.SelectedIndex - 1];
+                    }
                 }
             }
 
@@ -427,6 +641,13 @@ namespace Yfitops
         private void dataTracks_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
 
+        }
+
+        private void buttonMyFav_Click(object sender, EventArgs e)
+        {
+            var favForm = Program.ServiceProvider.GetRequiredService<FavoritesForm>();
+            favForm.SetCurrentUser(_currentUser);
+            favForm.Show();
         }
     }
 }

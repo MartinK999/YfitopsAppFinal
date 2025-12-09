@@ -13,5 +13,6 @@ namespace Yfitops.Models
         public int AlbumId { get; set; }
         public string AlbumTitle { get; set; }
         public string TrackAuthor { get; internal set; }
+        public int CreatedByUserId { get; set; }
     }
 }

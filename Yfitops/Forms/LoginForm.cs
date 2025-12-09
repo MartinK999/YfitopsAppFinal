@@ -62,11 +62,16 @@ namespace Yfitops
 
         private void LoginForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            
+
             if (e.CloseReason == CloseReason.UserClosing)
             {
                 Application.Exit();
             }
+        }
+
+        private void LoginForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

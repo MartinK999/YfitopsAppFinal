@@ -43,7 +43,7 @@ namespace Yfitops
                 .WithMany(a => a.Tracks)
                 .HasForeignKey(t => t.AlbumId)
                 .IsRequired(false)             
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);
         }
