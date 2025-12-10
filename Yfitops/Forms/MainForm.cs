@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -25,10 +26,15 @@ namespace Yfitops
         private readonly IUserRepository _userRepository;
         private readonly IUserFavoriteRepository _userFavoriteRepository;
 
+        private WaveOutEvent _output;
+        private AudioFileReader _audio;
+
         public MainForm(IAlbumRepository albumRepository, IUserRepository userRepository,
                 ITrackRepository trackRepository, IUserFavoriteRepository userFavoriteRepository)
         {
             InitializeComponent();
+            PanelFavorites_Load();
+
 
             _albumRepository = albumRepository;
             _userRepository = userRepository;
@@ -46,6 +52,10 @@ namespace Yfitops
             UpdateUIBasedOnRole();
             LoadAlbums();
             LoadTracks();
+
+            panelFavorites.Visible = false;
+            panelFavorites.BringToFront();
+
         }
 
         private void DataTracks_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
@@ -123,21 +133,25 @@ namespace Yfitops
                     buttonLogout.Visible = true;
                     buttonAddTrack.Visible = true;
                     buttonAddAlbum.Visible = true;
+                    buttonMyFav.Visible = true;
                     break;
                 case "Musician":
                     buttonLogout.Visible = true;
                     buttonAddTrack.Visible = true;
                     buttonAddAlbum.Visible = true;
+                    buttonMyFav.Visible = false;
                     break;
                 case "User":
                     buttonLogout.Visible = true;
                     buttonAddTrack.Visible = false;
                     buttonAddAlbum.Visible = false;
+                    buttonMyFav.Visible = true;
                     break;
                 case "Guest":
                     buttonLogout.Visible = false;
                     buttonAddTrack.Visible = false;
                     buttonAddAlbum.Visible = false;
+                    buttonMyFav.Visible = false;
                     break;
                 default:
                     // Handle unknown roles
@@ -307,6 +321,15 @@ namespace Yfitops
                 dataTracks.Columns.Add(favBtnArtist);
             }
 
+            var playBtn = new DataGridViewButtonColumn();
+            playBtn.Name = "PlayTrackButton";
+            playBtn.HeaderText = "▶";
+            playBtn.Text = "Play";
+            playBtn.UseColumnTextForButtonValue = true;
+            dataTracks.Columns.Add(playBtn);
+
+
+
             dataTracks.CellClick += DataTracks_CellClick;
         }
 
@@ -432,7 +455,19 @@ namespace Yfitops
                         LoadTracks();
                     }
                 }
+                else if (dataTracks.Columns[e.ColumnIndex].Name == "PlayTrackButton")
+                {
 
+                    if (string.IsNullOrEmpty(trackEntity.FilePath))
+                    {
+                        MessageBox.Show("File not found!");
+                        return;
+                    }
+                    else
+                    {
+                        PlayTrack(trackEntity.FilePath);
+                    }
+                }
             }
         }
 
@@ -579,8 +614,6 @@ namespace Yfitops
 
         private void buttonAddTrack_Click(object sender, EventArgs e)
         {
-            string trackTitle = Prompt.ShowDialog("Track name:", "Add New Track");
-            if (string.IsNullOrEmpty(trackTitle)) return;
 
             var myAlbums = _albumRepository.GetByArtistId(_currentUser.Id).ToList();
 
@@ -617,16 +650,29 @@ namespace Yfitops
                 }
             }
 
+            string trackTitle = Prompt.ShowDialog("Track name:", "Add New Track");
+            if (string.IsNullOrEmpty(trackTitle)) return;
 
-            var newTrack = new Models.Entities.Track
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Filter = "Audio files|*.mp3;*.wav;*.flac";
+
+            if (dlg.ShowDialog() == DialogResult.OK)
             {
-                Title = trackTitle,
-                AlbumId = selectedAlbum?.Id,
-                CreatedByUserId = _currentUser.Id
-            };
 
-            _trackRepository.Add(newTrack);
+                string selectedPath = dlg.FileName;
 
+
+                var newTrack = new Models.Entities.Track
+                {
+                    Title = trackTitle,
+                    AlbumId = selectedAlbum?.Id,
+                    CreatedByUserId = _currentUser.Id,
+                    FilePath = selectedPath
+                };
+
+                _trackRepository.Add(newTrack);
+
+            }
             if (selectedAlbum != null)
                 LoadTracksForAlbum(selectedAlbum.Id);
             else
@@ -643,11 +689,207 @@ namespace Yfitops
 
         }
 
+        private void PanelFavorites_Load()
+        {
+
+            var playBtn = new DataGridViewButtonColumn();
+            playBtn.Name = "PlayTrackButton";
+            playBtn.HeaderText = "▶";
+            playBtn.Text = "Play";
+            playBtn.UseColumnTextForButtonValue = true;
+            playBtn.DefaultCellStyle.BackColor = Color.Green;
+            dataFavTracks.Columns.Add(playBtn);
+
+            // Artists
+            var colArtist = new DataGridViewButtonColumn();
+            colArtist.Name = "RemoveArtist";
+            colArtist.Text = "Remove";
+            colArtist.UseColumnTextForButtonValue = true;
+            colArtist.DefaultCellStyle.BackColor = Color.LightCoral;
+            dataFavArtists.Columns.Add(colArtist);
+
+            // Albums
+            var colAlbum = new DataGridViewButtonColumn();
+            colAlbum.Name = "RemoveAlbum";
+            colAlbum.Text = "Remove";
+            colAlbum.UseColumnTextForButtonValue = true;
+            colAlbum.DefaultCellStyle.BackColor = Color.LightCoral;
+            dataFavAlbums.Columns.Add(colAlbum);
+
+            // Tracks
+            var colTrack = new DataGridViewButtonColumn();
+            colTrack.Name = "RemoveTrack";
+            colTrack.Text = "Remove";
+            colTrack.UseColumnTextForButtonValue = true;
+            colTrack.DefaultCellStyle.BackColor = Color.LightCoral;
+            dataFavTracks.Columns.Add(colTrack);
+
+            dataFavArtists.CellClick += dataFavArtists_CellClick;
+            dataFavAlbums.CellClick += dataFavAlbums_CellClick;
+            dataFavTracks.CellClick += dataFavTracks_CellClick;
+        }
+        private void LoadFavorites()
+        {
+
+
+            // Artists
+            var favArtists = _userFavoriteRepository.GetByUserId(_currentUser.Id)
+                .Where(f => f.FavoriteType == "Artist")
+                .Select(f => _userRepository.GetById(f.FavoriteId))
+                .Where(u => u != null)
+                .Select(u => new { u.Id, Name = u.Username })
+                .ToList();
+            dataFavArtists.DataSource = favArtists;
+
+            // Albums
+            var favAlbums = _userFavoriteRepository.GetByUserId(_currentUser.Id)
+                .Where(f => f.FavoriteType == "Album")
+                .Select(f => _albumRepository.GetById(f.FavoriteId))
+                .Where(a => a != null)
+                .Select(a => new { a.Id, a.Title })
+                .ToList();
+            dataFavAlbums.DataSource = favAlbums;
+
+            // Tracks
+            var favTracks = _userFavoriteRepository.GetByUserId(_currentUser.Id)
+                .Where(f => f.FavoriteType == "Track")
+                .Select(f => _trackRepository.GetById(f.FavoriteId))
+                .Where(t => t != null)
+                .Select(t => new { t.Id, t.Title })
+                .ToList();
+            dataFavTracks.DataSource = favTracks;
+
+
+        }
+
+        private void dataFavArtists_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0)
+                return;
+            if (dataFavArtists.Columns[e.ColumnIndex].Name == "RemoveArtist")
+            {
+                int artistId = (int)dataFavArtists.Rows[e.RowIndex].Cells["Id"].Value;
+
+                var fav = _userFavoriteRepository.GetByUserId(_currentUser.Id)
+                    .FirstOrDefault(f => f.FavoriteType == "Artist" && f.FavoriteId == artistId);
+
+                if (fav != null)
+                    _userFavoriteRepository.Delete(fav);
+
+                LoadFavorites();
+            }
+        }
+
+        private void dataFavAlbums_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0)
+                return;
+            if (dataFavAlbums.Columns[e.ColumnIndex].Name == "RemoveAlbum")
+            {
+                int albumId = (int)dataFavAlbums.Rows[e.RowIndex].Cells["Id"].Value;
+
+                var fav = _userFavoriteRepository.GetByUserId(_currentUser.Id)
+                    .FirstOrDefault(f => f.FavoriteType == "Album" && f.FavoriteId == albumId);
+
+                if (fav != null)
+                    _userFavoriteRepository.Delete(fav);
+
+                LoadFavorites();
+            }
+        }
+
+        private void dataFavTracks_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0)
+                return;
+            if (dataFavTracks.Columns[e.ColumnIndex].Name == "RemoveTrack")
+            {
+                int trackId = (int)dataFavTracks.Rows[e.RowIndex].Cells["Id"].Value;
+
+                var fav = _userFavoriteRepository.GetByUserId(_currentUser.Id)
+                    .FirstOrDefault(f => f.FavoriteType == "Track" && f.FavoriteId == trackId);
+
+                if (fav != null)
+                    _userFavoriteRepository.Delete(fav);
+
+                LoadFavorites();
+            }
+            else if (dataFavTracks.Columns[e.ColumnIndex].Name == "PlayTrackButton")
+            {
+                int trackId = (int)dataFavTracks.Rows[e.RowIndex].Cells["Id"].Value;
+                var trackEntity = _trackRepository.GetById(trackId);
+                if (string.IsNullOrEmpty(trackEntity.FilePath))
+                {
+                    MessageBox.Show("File not found!");
+                    return;
+                }
+                else
+                {
+                    PlayTrack(trackEntity.FilePath);
+                }
+            }
+        }
         private void buttonMyFav_Click(object sender, EventArgs e)
         {
-            var favForm = Program.ServiceProvider.GetRequiredService<FavoritesForm>();
-            favForm.SetCurrentUser(_currentUser);
-            favForm.Show();
+            LoadFavorites();
+
+            panelFavorites.Visible = true;
+            panelFavorites.BringToFront();
+        }
+
+        public void PlayTrack(string filePath)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    StopTrack();
+
+                    _audio = new AudioFileReader(filePath);
+                    _output = new WaveOutEvent();
+                    _output.Init(_audio);
+                    _output.Play();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message);
+                }
+            });
+        }
+        public void StopTrack()
+        {
+            _output?.Stop();
+            _audio?.Dispose();
+            _output?.Dispose();
+
+            _output = null;
+            _audio = null;
+        }
+
+        private void buttonStop_Click(object sender, EventArgs e)
+        {
+            StopTrack();
+        }
+
+        private void tabPage1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void panelFavorites_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void buttonFavClose_Click(object sender, EventArgs e)
+        {
+            panelFavorites.Visible = false;
+            LoadTracks();
+        }
+
+        private void buttonFavStop_Click(object sender, EventArgs e)
+        {
+            StopTrack();
         }
     }
 }

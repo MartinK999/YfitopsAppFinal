@@ -20,6 +20,9 @@ namespace Yfitops.Forms
         {
             InitializeComponent();
             _userRepository = userRepository;
+            
+
+            comboBoxRole.SelectedItem = "User";
         }
 
         private void buttonReg_Click(object sender, EventArgs e)
@@ -37,10 +40,7 @@ namespace Yfitops.Forms
             }
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(textBoxPassword.Text);
 
-            comboBoxRole.Items.Add("User");
-            comboBoxRole.Items.Add("Musician");
-
-            comboBoxRole.SelectedItem = "User";
+            
 
             var newUser = new User
             {
@@ -55,6 +55,11 @@ namespace Yfitops.Forms
         }
 
         private void RegistrationForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBoxRole_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }

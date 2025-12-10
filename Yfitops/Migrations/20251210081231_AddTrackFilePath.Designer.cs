@@ -10,8 +10,8 @@ using Yfitops;
 namespace Yfitops.Migrations
 {
     [DbContext(typeof(MusicContext))]
-    [Migration("20251208113013_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251210081231_AddTrackFilePath")]
+    partial class AddTrackFilePath
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,6 +48,10 @@ namespace Yfitops.Migrations
 
                     b.Property<int>("CreatedByUserId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -111,7 +115,7 @@ namespace Yfitops.Migrations
                     b.HasOne("Yfitops.Models.Entities.Album", "Album")
                         .WithMany("Tracks")
                         .HasForeignKey("AlbumId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Album");
                 });
